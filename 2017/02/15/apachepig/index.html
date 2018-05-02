@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Apache,大数据,分布式," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="使用 Apache Pig 从大数据集中获得所需的信息Apache Pig 是一个高级过程语言，适合于使用 Hadoop 和 MapReduce 平台来查询大型半结构化数据集。通过允许对分布式数据集进行类似 SQL 的查询，Pig 可以简化 Hadoop 的使用。本文将探索 Pig 背后的语言，并在一个简单的 Hadoop 集群中发现其用途。">
+<meta name="keywords" content="Apache,大数据,分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 Apache Pig 处理数据">
+<meta property="og:url" content="https://hlooc.github.io/2017/02/15/apachepig/index.html">
+<meta property="og:site_name" content="Hlooc">
+<meta property="og:description" content="使用 Apache Pig 从大数据集中获得所需的信息Apache Pig 是一个高级过程语言，适合于使用 Hadoop 和 MapReduce 平台来查询大型半结构化数据集。通过允许对分布式数据集进行类似 SQL 的查询，Pig 可以简化 Hadoop 的使用。本文将探索 Pig 背后的语言，并在一个简单的 Hadoop 集群中发现其用途。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-22T15:14:17.471Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 Apache Pig 处理数据">
+<meta name="twitter:description" content="使用 Apache Pig 从大数据集中获得所需的信息Apache Pig 是一个高级过程语言，适合于使用 Hadoop 和 MapReduce 平台来查询大型半结构化数据集。通过允许对分布式数据集进行类似 SQL 的查询，Pig 可以简化 Hadoop 的使用。本文将探索 Pig 背后的语言，并在一个简单的 Hadoop 集群中发现其用途。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hlooc.github.io/2017/02/15/apachepig/"/>
+
+
+
+
+
+  <title>使用 Apache Pig 处理数据 | Hlooc</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hlooc</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">我想在那里最蓝的大海扬帆。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hlooc.github.io/2017/02/15/apachepig/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hlooc">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hlooc">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 Apache Pig 处理数据</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-15T22:13:38+08:00">
+                2017-02-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/大数据/" itemprop="url" rel="index">
+                    <span itemprop="name">大数据</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/大数据/Apache-Pig/" itemprop="url" rel="index">
+                    <span itemprop="name">Apache Pig</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/15/apachepig/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/15/apachepig/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="使用-Apache-Pig-从大数据集中获得所需的信息"><a href="#使用-Apache-Pig-从大数据集中获得所需的信息" class="headerlink" title="使用 Apache Pig 从大数据集中获得所需的信息"></a>使用 Apache Pig 从大数据集中获得所需的信息</h2><p>Apache Pig 是一个高级过程语言，适合于使用 Hadoop 和 MapReduce 平台来查询大型半结构化数据集。通过允许对分布式数据集进行类似 SQL 的查询，Pig 可以简化 Hadoop 的使用。本文将探索 Pig 背后的语言，并在一个简单的 Hadoop 集群中发现其用途。<br><a id="more"></a><br>Hadoop 的普及和其生态系统的不断壮大并不令人感到意外。Hadoop 不断进步的一个特殊领域是 Hadoop 应用程序的编写。虽然编写 Map 和 Reduce 应用程序并不十分复杂，但这些编程确实需要一些软件开发经验。Apache Pig 改变了这种状况，它在 MapReduce 的基础上创建了更简单的过程语言抽象，为 Hadoop 应用程序提供了一种更加接近结构化查询语言 (SQL) 的接口。因此，您不需要编写一个单独的 MapReduce 应用程序，您可以用 Pig Latin 语言写一个脚本，在集群中自动并行处理与分发该脚本。</p>
+<h2 id="Pig-Latin-示例"><a href="#Pig-Latin-示例" class="headerlink" title="Pig Latin 示例"></a>Pig Latin 示例</h2><p>让我们从一个简单的 Pig 示例开始介绍，并剖析该示例。Hadoop 的一个有趣的用法是，在大型数据集中搜索满足某个给定搜索条件的记录（在 Linux® 中被称为 grep）。清单 1 显示了在 Pig 中实现该过程的简单性。在所显示的三行代码中，只有一行是真正的搜索。第一行只是将测试数据集（消息日志）读取到代表元组集合的包中。用一个正则表达式来筛选该数据（元组中的惟一条目，表示为 $0 或 field 1），然后查找字符序列 WARN。最后，在主机文件系统中将这个包存储在一个名为 warnings 的新文件中，这个包现在代表来自消息的包含 WARN 的所有元组。</p>
+<h4 id="清单-1-一个简单的-Pig-Latin-脚本"><a href="#清单-1-一个简单的-Pig-Latin-脚本" class="headerlink" title="清单 1. 一个简单的 Pig Latin 脚本"></a>清单 1. 一个简单的 Pig Latin 脚本</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">messages = LOAD &apos;messages&apos;;</span><br><span class="line">warns = FILTER messages BY $0 MATCHES &apos;.*WARN+.*&apos;;</span><br><span class="line">STORE warns INTO &apos;warnings&apos;;</span><br></pre></td></tr></table></figure>
+<p>如您所见，这个简单的脚本实现了一个简单的流，但是，如果直接在传统的 MapReduce 模型中实现它，则需要增加大量的代码。这使得学习 Hadoop 并开始使用数据比原始开发容易得多。<br>现在让我们更深入地探讨 Pig 语言，然后查看该语言的一些功能的其他示例。</p>
+<p><blockquote class="blockquote-center">Pig Latin 的基础知识</blockquote><br>Pig Latin 是一个相对简单的语言，它可以执行语句。一调语句 就是一个操作，它需要输入一些内容（比如代表一个元组集的包），并发出另一个包作为其输出。一个包 就是一个关系，与表类似，您可以在关系数据库中找到它（其中，元组代表行，并且每个元组都由字段组成）。<br>用 Pig Latin 编写的脚本往往遵循以下特定格式，从文件系统读取数据，对数据执行一系列操作（以一种或多种方式转换它），然后，将由此产生的关系写回文件系统。您可以在 清单 1 中看到该模式的最简单形式（一个转换）。<br>Pig 拥有大量的数据类型，不仅支持包、元组和映射等高级概念，还支持简单的数据类型，如 int、long、float、double、chararray 和 bytearray。如果使用简单的类型，您会发现，除了称为 bincond 的条件运算符（其操作类似于 C ternary 运算符）之外，还有其他许多算术运算符（比如 add、subtract、multiply、divide 和 module）。并且，如您所期望的那样，还有一套完整的比较运算符，包括使用正则表达式的丰富匹配模式。<br>所有 Pig Latin 语句都需要对关系进行操作（并被称为关系运算符）。正如您在 清单 1 中看到的，有一个运算符用于从文件系统加载数据和将数据存储到文件系统中。有一种方式可以通过迭代关系的行来 FILTER 数据。此功能常用于从后续操作不再需要的关系中删除数据。另外，如果您需要对关系的列进行迭代，而不是对行进行迭代，您可以使用 FOREACH 运算符。FOREACH 允许进行嵌套操作，如 FILTER 和 ORDER，以便在迭代过程中转换数据。<br>ORDER 运算符提供了基于一个或多个字段对关系进行排序的功能。JOIN 运算符基于公共字段执行两个或两个以上的关系的内部或外部联接。SPLIT 运算符提供了根据用户定义的表达式将一个关系拆分成两个或两个以上关系的功能。最后，GROUP 运算符根据某个表达式将数据分组成为一个或多个关系。</p>
+<h4 id="Pig-中的部分关系运算符列表。"><a href="#Pig-中的部分关系运算符列表。" class="headerlink" title="Pig 中的部分关系运算符列表。"></a>Pig 中的部分关系运算符列表。</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">FILTER	基于某个条件从关系中选择一组元组。</span><br><span class="line">FOREACH	对某个关系的元组进行迭代，生成一个数据转换。</span><br><span class="line">GROUP	将数据分组为一个或多个关系。</span><br><span class="line">JOIN	联接两个或两个以上的关系（内部或外部联接）。</span><br><span class="line">LOAD	从文件系统加载数据。</span><br><span class="line">ORDER	根据一个或多个字段对关系进行排序。</span><br><span class="line">SPLIT	将一个关系划分为两个或两个以上的关系。</span><br><span class="line">STORE	在文件系统中存储数据。</span><br></pre></td></tr></table></figure>
+<p>虽然这不是一个详尽的 Pig Latin 运算符清单，但该表提供了一套在处理大型数据集时非常有用的操作。您可以通过 <a href="http://pig.apache.org/" target="_blank" rel="noopener">http://pig.apache.org/</a> 了解完整的 Pig Latin 语言，因为 Pig 有一套不错的在线文档。现在尝试着手编写一些 Pig Latin 脚本，以了解这些运算符的实际工作情况。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Apache/" rel="tag"># Apache</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/14/optaplanner/" rel="next" title="OptaPlanner：业务规划与资源调度优化求解程序">
+                <i class="fa fa-chevron-left"></i> OptaPlanner：业务规划与资源调度优化求解程序
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/16/echarts-java/" rel="prev" title="ECharts-Java 详细介绍">
+                ECharts-Java 详细介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="2017/02/15/apachepig/"
+           data-title="使用 Apache Pig 处理数据" data-url="https://hlooc.github.io/2017/02/15/apachepig/">
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hlooc</p>
+              <p class="site-description motion-element" itemprop="description">天下事有难易乎？为之，则难者亦易矣；不为，则易者亦难矣。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/hlooc" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://twitter.com/qiushijun" target="_blank" title="Twitter">
+                      
+                        <i class="fa fa-fw fa-globe"></i>Twitter</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Apache-Pig-从大数据集中获得所需的信息"><span class="nav-number">1.</span> <span class="nav-text">使用 Apache Pig 从大数据集中获得所需的信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pig-Latin-示例"><span class="nav-number">2.</span> <span class="nav-text">Pig Latin 示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#清单-1-一个简单的-Pig-Latin-脚本"><span class="nav-number">2.0.1.</span> <span class="nav-text">清单 1. 一个简单的 Pig Latin 脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pig-中的部分关系运算符列表。"><span class="nav-number">2.0.2.</span> <span class="nav-text">Pig 中的部分关系运算符列表。</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hlooc</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"qiushijun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
